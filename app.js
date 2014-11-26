@@ -6,7 +6,7 @@
 
 /*loading mongodb*/    
 var mongojs = require("mongojs")
-var db = mongojs("mongodb://AwSZome:jn0903@ds059907.mongolab.com:59907/awesome_box");   
+var db = mongojs("mongodb://AwSZome:guest@guest.mongolab.com:59907/awesome_box");   
 
 
 

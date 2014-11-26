@@ -211,6 +211,7 @@ console.log(pathway)
                 var currency = lines[x][y].currency
                 var account = lines[x][y].account
                 var payment = {account: account, amount: amount, currency: currency}
+                
             callback(payment)
                 y++
                 loop()
