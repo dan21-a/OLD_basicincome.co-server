@@ -1,6 +1,8 @@
-exports.API = function(db, account_id, callback){
+exports.API = function(account_id, callback){
     
-
+/*loading mongodb*/    
+var mongojs = require("mongojs")
+var db = mongojs("mongodb://test:test@ds059907.mongolab.com:59907/awesome_box");   
 
 
 // ---------------------------- swarm-redistribution API ----------------------------------
@@ -38,6 +40,7 @@ var get_dividend_lines = function(callback){
     get_wallet()
     function get_wallet(){
     COLLECTION.find({type:"tax_blob"}, function(err,doc){
+        console.log("TEST")
         console.log(doc)
         if(q<doc.length){
         total_amount = doc[q].total_amount
