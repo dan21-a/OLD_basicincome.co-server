@@ -205,7 +205,7 @@ console.log(pathway)
                 var account = lines[x][y].account
                 var payment = {account: account, amount: amount, currency: currency}
                 
-            callback(payment)
+                console.log(payment)
                 y++
                 loop()
                 }
