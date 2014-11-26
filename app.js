@@ -1,6 +1,6 @@
 // RESILIENCE.ME, the worlds first p2p basic income network
 // see http://www.resilience.me/videos.html
-// Johan Nygren, How to Create Resilience, SpaceCollective
+// Johan Nygren, How to Create Resilience [2013], SpaceCollective
 
 // any form of database works, I use mongoDB
 
