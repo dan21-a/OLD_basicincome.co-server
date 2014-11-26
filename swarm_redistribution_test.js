@@ -1,8 +1,3 @@
-exports.API = function(db, account_id, callback){
-    
-
-
-
 // ---------------------------- swarm-redistribution API ----------------------------------
 
 // coin-agnostic general purpuse API - connect any coin platform
@@ -15,7 +10,8 @@ exports.API = function(db, account_id, callback){
 // first, get_collection() loads a nodes dividend pathways
 // see video Systems-Architechture [2014], https://www.youtube.com/watch?v=PmPq3ywnnoI
 
-
+var mongojs = require("mongojs")
+var db = mongojs("mongodb://test:test@ds059907.mongolab.com:59907/awesome_box");   
 
 
 // ---------------------------- swarm-redistribution ----------------------------------
