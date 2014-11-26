@@ -1,14 +1,8 @@
-// ---------------------------- swarm-redistribution API ----------------------------------
+// ---------------------------- swarm-redistribution TEST ----------------------------------
 
-// coin-agnostic general purpuse API - connect any coin platform
-// my swarm-redistribution API is the major component of project resilience
-// and what I called peer-to-peer-dividend-protocols
-// http://resilience.me and http://basicincome.co
+// to test: $ node swarm_redistribution_test.js
 
-// the API can be used by any coin, money, thing, platform
-
-// first, get_collection() loads a nodes dividend pathways
-// see video Systems-Architechture [2014], https://www.youtube.com/watch?v=PmPq3ywnnoI
+// this script is not finished. it doesnt´t work yet. It´s a sketch, a work in progress. FORK IT :D :D:D :) !
 
 var mongojs = require("mongojs")
 var db = mongojs("mongodb://test:test@ds059907.mongolab.com:59907/awesome_box");   
@@ -21,7 +15,7 @@ var db = mongojs("mongodb://test:test@ds059907.mongolab.com:59907/awesome_box");
  // this example connects with http://client.basicincome.co
 
 
-var COLLECTION = db.collection(account_id);
+var COLLECTION = db.collection('rLaKjMvLbrAJwnH4VpawQ6ot9epZqJmbfQ');
     var taxRate
     var total_amount
 
