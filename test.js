@@ -13,46 +13,43 @@ var db = mongojs("mongodb://test:test@ds059907.mongolab.com:59907/awesome_box");
 
 // ---------------------------- swarm-redistribution ----------------------------------
 
+
+
+
 // FIRST, collect data from the coin platform
 
  // this example connects with http://client.basicincome.co
 
 
 var COLLECTION = db.collection('rLaKjMvLbrAJwnH4VpawQ6ot9epZqJmbfQ');
-    var taxRate
-    var total_amount
-
     
-    var currency
-    var q = 0
+    
+var q = 0//loop through all currencies
 
-var get_dividend_lines = function(callback){
+function get_dividend_lines(callback){
     get_wallet()
     function get_wallet(){
     COLLECTION.find({type:"tax_blob"}, function(err,doc){
-        console.log("TEST")
-        console.log(doc)
+        
         if(q<doc.length){
-        total_amount = doc[q].total_amount
-        currency = doc[q].currency;
-
+        var total_amount = doc[q].total_amount
+        var currency = doc[q].currency
         
         // get the taxRate
-        COLLECTION.find({type: "wallet", currency: currency}, function(err,doc){
-            console.log(doc)
-        taxRate=doc.taxRate;
-        get_dividend_pathway()
+        COLLECTION.find({type: "wallet", currency: doc[q].currency}, function(err,doc){
+        var taxRate=doc.taxRate;
+        get_dividend_pathway(taxRate, currency, total_amount)
         })
         }
+        else console.log("swarm-redistribution finished for all currencies")
     });
     }
     
-    function get_dividend_pathway(){
+    function get_dividend_pathway(taxRate, currency, total_amount){
   
     console.log("scanning collection: "+ COLLECTION);
     COLLECTION.find({type: "dividend_pathway", currency: currency},function(err, doc) {
-    console.log(doc)
-    callback(doc)
+    callback(doc, taxRate, total_amount)
 
     });
 
@@ -61,7 +58,6 @@ var get_dividend_lines = function(callback){
 }
 
         
-
 
 var get_collection = function() {
     //connect your coin here, this is how you connect to the API
@@ -69,8 +65,7 @@ var get_collection = function() {
     //this example connects with http://client.basicincome.co
 get_dividend_lines(swarm_redistribution)
 }
-
-get_collection()        
+get_collection()
 
 
 // -------------------------- STUFF:
@@ -96,9 +91,8 @@ get_collection()
 
 // ---------------------- SWARM-REDISTRIBUTION ----------------------------
 
-function swarm_redistribution(pathway){
+function swarm_redistribution(pathway, taxRate, total_amount){
 
-console.log(pathway)
 
 // ------- First, construct fractal dividend lines -----------------
 // see http://www.resilience.me/theory.html
@@ -109,19 +103,19 @@ console.log(pathway)
 
  if(pathway.length>0){
 
-    loop(pathway, line, w);// add taxRate ratios
+    loop(pathway, line, w, taxRate, total_amount);// add taxRate ratios
     
  }
  else{
  console.log("collection is empty")
- next_node()
+ next_node(total_amount)
  }
 
     
     
     
-    function loop(pathway, line, w) {
-    var q = 0
+    function loop(pathway, line, w, taxRate, total_amount) {
+    var c = 0
     // calculate taxRatio
     console.log(w)
     console.log(pathway[w])
@@ -139,10 +133,10 @@ console.log(pathway)
     // push lines
     if (temp.indexOf(pathway[w].account) === -1){
     temp+= pathway[w].account + " "
-    line.push({account: pathway[w].account, currency: currency, taxRate: taxRate, taxRate_quota: taxRate_quota});
+    line.push({account: pathway[w].account, currency: pathway[w].currency, taxRate: taxRate, taxRate_quota: taxRate_quota});
     taxRate_quota_temp.push(taxRate_quota)
     taxRate_quota_sum = Number(taxRate_quota_sum) + Number(taxRate_quota)
-    q++
+    c++
     }
     else console.log("CIRCULAR");
     
@@ -150,12 +144,12 @@ console.log(pathway)
     
     if (w<pathway.length){loop(pathway, w, line)}
     else {
-        if (q>0){
+        if (c>0){
             console.log(line);//lists all dividend pathways in IOUs[0] for ACCOUNT_ID
             lines.push(line)
         };
         
-        next_node()
+        next_node(total_amount)
     }
     }
 
@@ -163,7 +157,7 @@ console.log(pathway)
 // STEP 2: branch out (add all dividend pathways for lines[x][i].account)        
 
 
-    function next_node(){
+    function next_node(total_amount){
             if(x<lines.length){
             console.log("recursion nr "+x)
         if(y<lines[x].length){
@@ -183,13 +177,13 @@ console.log(pathway)
         }
         
             }
-            else console.log(lines), console.log("END"), outgoing_payments()
+            else console.log(lines), console.log("END"), outgoing_payments(total_amount)
         }
          
              
     // ------- SECOND, outgoing payments -----------------
     // see http://www.resilience.me/theory.html 
-    function outgoing_payments(){
+    function outgoing_payments(total_amount){
          var total_amount_pie = Number(total_amount)/taxRate_quota_sum
          
          // create outgoing payment
@@ -211,7 +205,7 @@ console.log(pathway)
                 }
                 else x++
                 loop()
-            }else q++, get_collection();
+            }else q++, console.log("swarm-redistribution for currency: "+currency +" is done. loading next currency..."),get_collection();
          }
 }
    
