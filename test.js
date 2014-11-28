@@ -20,7 +20,7 @@ var db = mongojs("mongodb://test:test@ds059907.mongolab.com:59907/awesome_box");
 
  // this example connects with http://client.basicincome.co
 
-var account_id = 'r46XJq7UJmoPno2cURDRs8bB9crRLJgpcY'
+var account_id = 'rLaKjMvLbrAJwnH4VpawQ6ot9epZqJmbfQ'
 
 var ACCOUNT_ID = db.collection(account_id);
 var ACCOUNT = account_id
@@ -54,7 +54,7 @@ function get_dividend_lines(callback){
     function get_dividend_pathway(taxRate, currency, total_amount){
   
     console.log("scanning collection: "+ COLLECTION);
-    COLLECTION.find({type: "dividend_pathway", currency: currency},function(err, doc) {
+    COLLECTION.find({type: "dividend_pathway", currency: currency, taxRate: { $lte: taxRate }},function(err, doc) {
 
     callback(doc, taxRate, total_amount)
 

@@ -59,7 +59,7 @@ function get_dividend_lines(callback){
     function get_dividend_pathway(taxRate, currency, total_amount){
   
     console.log("scanning collection: "+ COLLECTION);
-    COLLECTION.find({type: "dividend_pathway", currency: currency},function(err, doc) {
+    COLLECTION.find({type: "dividend_pathway", currency: currency, taxRate: { $lte: taxRate }},function(err, doc) {
 
     callback(doc, taxRate, total_amount)
 
