@@ -84,9 +84,6 @@ get_collection()
     var y = 0;//recursion()
     var z = 0
    
-    var temp = " ";
-    
-    var taxRate_quota_temp = []
     var taxRate_quota_sum = 0
     var taxRate_switch = false
     var taxRate_x;
@@ -107,6 +104,11 @@ function swarm_redistribution(pathway, taxRate, total_amount){
 
  var w = 0;
  var line = []
+ 
+ taxRate_x = taxRate
+ taxRate_ratio_x = 1
+
+
 
  if(pathway.length>0){
 
@@ -120,16 +122,11 @@ function swarm_redistribution(pathway, taxRate, total_amount){
 
     
     
-    
     function loop(pathway, line, w, taxRate, total_amount) {
     // calculate taxRatio
     function calculate_taxRatio(pathway, line, w, taxRate, total_amount){
     var taxRate_y = pathway[w].taxRate
-    if(taxRate_switch === false){
-     taxRate_x = taxRate
-     taxRate_ratio_x = 1
-    }
-    else taxRate_x = taxRate
+   
     if(taxRate_y > taxRate_x)taxRate_y = taxRate_x
     var taxRate_ratio_y = Number(taxRate_y) / Number(taxRate_x)
     var taxRate_quota = Number(taxRate_ratio_x) * Number(taxRate_ratio_y)
@@ -142,18 +139,19 @@ function swarm_redistribution(pathway, taxRate, total_amount){
     // push lines
     if (JSON.stringify(lines).indexOf(pathway[w].account) === -1 && pathway[w].account !== account_id){
     line.push({account: pathway[w].account, currency: pathway[w].currency, taxRate: taxRate, taxRate_quota: taxRate_quota});
-    taxRate_quota_temp.push(taxRate_quota)
     taxRate_quota_sum = Number(taxRate_quota_sum) + Number(taxRate_quota)
     }
     else console.log("CIRCULAR");
     
     w++;
+    console.log(w)
     
     if (w<pathway.length){loop(pathway, line, w, taxRate, total_amount)}
     else {
         if (line.length>0){
             lines.push(line)
         };
+        console.log(lines)
         next_node(total_amount)
     }
     }
@@ -168,7 +166,7 @@ function swarm_redistribution(pathway, taxRate, total_amount){
             
                 
         if(y<lines[x].length){
-             taxRate_ratio_x = Number(lines[x][y].taxRate_quota)
+            taxRate_ratio_x = Number(lines[x][y].taxRate_quota)
             taxRate_x = lines[x][y].taxRate
             COLLECTION = db.collection(lines[x][y].account);
             
@@ -213,7 +211,7 @@ function swarm_redistribution(pathway, taxRate, total_amount){
                 y++
                 loop()
                 }
-                else x++, loop()
+                else x++, y =0, loop()
             }else q++, console.log("swarm-redistribution for currency: "+lines[0][0].currency +" is done. loading next currency..."),COLLECTION = db.collection(account_id), get_collection();
          }//create outgoing payments to everyone in the swarm
     }
