@@ -23,8 +23,9 @@ var db = mongojs("mongodb://test:test@ds059907.mongolab.com:59907/awesome_box");
 var account_id = 'r46XJq7UJmoPno2cURDRs8bB9crRLJgpcY'
 
 var ACCOUNT_ID = db.collection(account_id);
+var ACCOUNT = account_id
 
-var COLLECTION = db.collection(account_id);
+var COLLECTION = db.collection(ACCOUNT);
     
     
 var q = 0//loop through all currencies
@@ -69,6 +70,7 @@ var get_collection = function() {
     //connect your coin here, this is how you connect to the API
     //the callback feeds collection/dividend-pathways
     //this example connects with http://client.basicincome.co
+COLLECTION = db.collection(ACCOUNT);
 get_dividend_lines(swarm_redistribution)
 }
 get_collection()
@@ -138,7 +140,7 @@ function swarm_redistribution(pathway, taxRate, total_amount){
 
     // push lines
     if (JSON.stringify(lines).indexOf(pathway[w].account) === -1 && pathway[w].account !== account_id){
-    line.push({account: pathway[w].account, currency: pathway[w].currency, taxRate: taxRate, taxRate_quota: taxRate_quota});
+    line.push({account: pathway[w].account, currency: pathway[w].currency, taxRate: taxRate, taxRate_quota: taxRate_quota, node: ACCOUNT});
     taxRate_quota_sum = Number(taxRate_quota_sum) + Number(taxRate_quota)
     }
     else console.log("CIRCULAR");
@@ -168,7 +170,7 @@ function swarm_redistribution(pathway, taxRate, total_amount){
         if(y<lines[x].length){
             taxRate_ratio_x = Number(lines[x][y].taxRate_quota)
             taxRate_x = lines[x][y].taxRate
-            COLLECTION = db.collection(lines[x][y].account);
+            ACCOUNT = lines[x][y].account;
             
             y++;
             z++
@@ -201,18 +203,18 @@ function swarm_redistribution(pathway, taxRate, total_amount){
 
             if (x<lines.length){     
                 if (y<lines[x].length){
-                
+                console.log(lines[x][y])
                 var amount = Number(total_amount_pie * lines[x][y].taxRate_quota)
                 var currency = lines[x][y].currency
                 var account = lines[x][y].account
-                var payment = {account: account, amount: amount, currency: currency}
+                var payment = {account: account, amount: amount, currency: currency, node: lines[x][y].node}
                 
-                console.log(payment)
+                console.log(payment, account_id)
                 y++
                 loop()
                 }
                 else x++, y =0, loop()
-            }else q++, console.log("swarm-redistribution for currency: "+lines[0][0].currency +" is done. loading next currency..."),COLLECTION = db.collection(account_id), get_collection();
+            }else q++, console.log("swarm-redistribution for currency: "+lines[0][0].currency +" is done. loading next currency..."),ACCOUNT = account_id, get_collection();
          }//create outgoing payments to everyone in the swarm
     }
    

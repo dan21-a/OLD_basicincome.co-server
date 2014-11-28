@@ -49,7 +49,7 @@ req.request();
 remote.on('transaction', function(data){
  
 
-// console.log(data.transaction)
+console.log(data.engine_result_message)
 
 // ---------------------------- connect transaction
 
@@ -75,7 +75,6 @@ remote.on('transaction', function(data){
         
     }, 
         function(err,doc){
-                console.log(doc)
         })
 
  COLLECTION.findAndModify({
@@ -86,7 +85,6 @@ remote.on('transaction', function(data){
         
     }, 
         function(err,doc){
-                console.log(doc)
         })
 }
 

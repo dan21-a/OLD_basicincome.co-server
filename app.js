@@ -44,9 +44,7 @@ var swarm_redistribution = require("./swarm_redistribution")
 
 function swarm(account_id){
     swarm_redistribution.API(db, account_id, send_client)
-    
 function send_client(payment){
-    basicincome_co.send_client(payment)
-            
+    basicincome_co.send_client(payment, account_id)
 }
 }
