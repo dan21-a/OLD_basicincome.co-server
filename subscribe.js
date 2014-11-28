@@ -68,7 +68,7 @@ console.log(data.engine_result_message)
     function update_collection(taxRate){          
     //get dividend_pathway
     COLLECTION.findAndModify({
-        query: {type: "dividend_pathway", account: data.transaction.Account, currency: data.transaction.Amount.currency, taxRate: Number(taxRate)}, 
+        query: {type: "dividend_pathway", account: data.transaction.Account, currency: data.transaction.Amount.currency, taxRate: taxRate}, 
         update:{$inc:{total_pathway:Number(data.transaction.Amount.value)}}, 
         upsert: true,
         new: true

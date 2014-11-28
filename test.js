@@ -33,7 +33,7 @@ var q = 0//loop through all currencies
 function get_dividend_lines(callback){
     get_wallet()
     function get_wallet(){
-    ACCOUNT_ID.find({type:"tax_blob"}, function(err,doc){
+    ACCOUNT_ID.find({type:"tax_blob", total_amount: {$gt: 0}}, function(err,doc){
         
         if(q<doc.length){
         var total_amount = doc[q].total_amount
@@ -55,7 +55,7 @@ function get_dividend_lines(callback){
   
     console.log("scanning collection: "+ COLLECTION);
     COLLECTION.find({type: "dividend_pathway", currency: currency, taxRate: { $lte: taxRate }},function(err, doc) {
-
+console.log(doc)
     callback(doc, taxRate, total_amount)
 
     });
@@ -140,7 +140,7 @@ function swarm_redistribution(pathway, taxRate, total_amount){
 
     // push lines
     if (JSON.stringify(lines).indexOf(pathway[w].account) === -1 && pathway[w].account !== account_id){
-    line.push({account: pathway[w].account, currency: pathway[w].currency, taxRate: taxRate, taxRate_quota: taxRate_quota, node: ACCOUNT});
+    line.push({account: pathway[w].account, currency: pathway[w].currency, taxRate: pathway[w].taxRate, taxRate_quota: taxRate_quota, node: ACCOUNT});
     taxRate_quota_sum = Number(taxRate_quota_sum) + Number(taxRate_quota)
     }
     else console.log("CIRCULAR");

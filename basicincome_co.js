@@ -51,6 +51,7 @@ callback(ACCOUNT_ID)
     
     
         exports.send_client = function(payment, account_id) {
+            var i = 0//to close function, each call opens a functions, receieved multiple socket copies
         console.log("outgoing payments sent !")
             conn.sendText(JSON.stringify(payment));
            
@@ -58,9 +59,9 @@ callback(ACCOUNT_ID)
                conn.on("text", function (str) {
             var string = JSON.parse(str)
 
-            if(str.indexOf("engine_result")!==-1 && string.tx_json.Destination === payment.account){payment_recieved()}
+            if(str.indexOf("engine_result")!==-1 && i===0){payment_recieved()}
         function payment_recieved(){
-            
+            i++
             console.log("payment went through")
             console.log("Received: "+str);
             // deduct the dividend pathways
@@ -75,7 +76,9 @@ callback(ACCOUNT_ID)
             update:{$inc:{total_amount:-amount}}
             })
         }
+
              })
+
         }
         
         

@@ -38,7 +38,7 @@ var q = 0//loop through all currencies
 function get_dividend_lines(callback){
     get_wallet()
     function get_wallet(){
-    ACCOUNT_ID.find({type:"tax_blob"}, function(err,doc){
+    ACCOUNT_ID.find({type:"tax_blob", total_amount: {$gt: 0}}, function(err,doc){
         
         if(q<doc.length){
         var total_amount = doc[q].total_amount
