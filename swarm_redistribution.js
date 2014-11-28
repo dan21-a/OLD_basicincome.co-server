@@ -17,49 +17,50 @@ exports.API = function(db, account_id, callback){
 
 
 
-
 // ---------------------------- swarm-redistribution ----------------------------------
+
+
+
 
 // FIRST, collect data from the coin platform
 
  // this example connects with http://client.basicincome.co
 
 
+var ACCOUNT_ID = db.collection(account_id);
+
 var COLLECTION = db.collection(account_id);
-    var taxRate
-    var total_amount
-
     
-    var currency
-    var q = 0
+    
+var q = 0//loop through all currencies
 
-var get_dividend_lines = function(callback){
+function get_dividend_lines(callback){
     get_wallet()
     function get_wallet(){
-    COLLECTION.find({type:"tax_blob"}, function(err,doc){
-        console.log("TEST")
-        console.log(doc)
-        if(q<doc.length){
-        total_amount = doc[q].total_amount
-        currency = doc[q].currency;
-
+    ACCOUNT_ID.find({type:"tax_blob"}, function(err,doc){
         
+        if(q<doc.length){
+        var total_amount = doc[q].total_amount
+        var currency = doc[q].currency
+
         // get the taxRate
-        COLLECTION.find({type: "wallet", currency: currency}, function(err,doc){
-            console.log(doc)
-        taxRate=doc.taxRate;
-        get_dividend_pathway()
+        ACCOUNT_ID.findOne({type: "wallet", currency: doc[q].currency}, function(err,doc){
+
+        var taxRate=doc.taxRate;
+
+        get_dividend_pathway(taxRate, currency, total_amount)
         })
         }
+        else console.log("swarm-redistribution finished for all currencies")
     });
     }
     
-    function get_dividend_pathway(){
+    function get_dividend_pathway(taxRate, currency, total_amount){
   
     console.log("scanning collection: "+ COLLECTION);
     COLLECTION.find({type: "dividend_pathway", currency: currency},function(err, doc) {
-    console.log(doc)
-    callback(doc)
+
+    callback(doc, taxRate, total_amount)
 
     });
 
@@ -68,7 +69,6 @@ var get_dividend_lines = function(callback){
 }
 
         
-
 
 var get_collection = function() {
     //connect your coin here, this is how you connect to the API
@@ -76,8 +76,7 @@ var get_collection = function() {
     //this example connects with http://client.basicincome.co
 get_dividend_lines(swarm_redistribution)
 }
-
-get_collection()        
+get_collection()
 
 
 // -------------------------- STUFF:
@@ -88,6 +87,7 @@ get_collection()
     
     var x = 0;//recursion()
     var y = 0;//recursion()
+    var z = 0
    
     var temp = " ";
     
@@ -103,9 +103,8 @@ get_collection()
 
 // ---------------------- SWARM-REDISTRIBUTION ----------------------------
 
-function swarm_redistribution(pathway){
+function swarm_redistribution(pathway, taxRate, total_amount){
 
-console.log(pathway)
 
 // ------- First, construct fractal dividend lines -----------------
 // see http://www.resilience.me/theory.html
@@ -116,22 +115,20 @@ console.log(pathway)
 
  if(pathway.length>0){
 
-    loop(pathway, line, w);// add taxRate ratios
+    loop(pathway, line, w, taxRate, total_amount);// add taxRate ratios
     
  }
  else{
  console.log("collection is empty")
- next_node()
+ next_node(total_amount)
  }
 
     
     
     
-    function loop(pathway, line, w) {
-    var q = 0
+    function loop(pathway, line, w, taxRate, total_amount) {
     // calculate taxRatio
-    console.log(w)
-    console.log(pathway[w])
+    function calculate_taxRatio(pathway, line, w, taxRate, total_amount){
     var taxRate_y = pathway[w].taxRate
     if(taxRate_switch === false){
      taxRate_x = taxRate
@@ -141,28 +138,29 @@ console.log(pathway)
     if(taxRate_y > taxRate_x)taxRate_y = taxRate_x
     var taxRate_ratio_y = Number(taxRate_y) / Number(taxRate_x)
     var taxRate_quota = Number(taxRate_ratio_x) * Number(taxRate_ratio_y)
-    console.log(temp.indexOf(pathway[w].account))
-    
+    push_lines(taxRate_quota, total_amount)
+    }
+    calculate_taxRatio(pathway, line, w, taxRate, total_amount)
+
+    function push_lines(taxRate_quota, total_amount){
+
     // push lines
-    if (temp.indexOf(pathway[w].account) === -1){
-    temp+= pathway[w].account + " "
-    line.push({account: pathway[w].account, currency: currency, taxRate: taxRate, taxRate_quota: taxRate_quota});
+    if (JSON.stringify(lines).indexOf(pathway[w].account) === -1 && pathway[w].account !== account_id){
+    line.push({account: pathway[w].account, currency: pathway[w].currency, taxRate: taxRate, taxRate_quota: taxRate_quota});
     taxRate_quota_temp.push(taxRate_quota)
     taxRate_quota_sum = Number(taxRate_quota_sum) + Number(taxRate_quota)
-    q++
     }
     else console.log("CIRCULAR");
     
     w++;
     
-    if (w<pathway.length){loop(pathway, w, line)}
+    if (w<pathway.length){loop(pathway, line, w, taxRate, total_amount)}
     else {
-        if (q>0){
-            console.log(line);//lists all dividend pathways in IOUs[0] for ACCOUNT_ID
+        if (line.length>0){
             lines.push(line)
         };
-        
-        next_node()
+        next_node(total_amount)
+    }
     }
     }
 
@@ -170,33 +168,36 @@ console.log(pathway)
 // STEP 2: branch out (add all dividend pathways for lines[x][i].account)        
 
 
-    function next_node(){
+    function next_node(total_amount){
             if(x<lines.length){
-            console.log("recursion nr "+x)
+            
+                
         if(y<lines[x].length){
-            console.log("taxRate_quota:" +lines[x][y].taxRate_quota)
-            taxRate_ratio_x = Number(lines[x][y].taxRate_quota)
+             taxRate_ratio_x = Number(lines[x][y].taxRate_quota)
             taxRate_x = lines[x][y].taxRate
             COLLECTION = db.collection(lines[x][y].account);
+            
             y++;
+            z++
+            console.log("recursion nr "+z)
             get_collection();
         }
                 
         else {
-           x++;
-           y = 0;
-            console.log("recursion nr "+x)
-            get_collection()
+            x++;
+            y = 0
+            next_node(total_amount)
+          
         }
         
             }
-            else console.log(lines), console.log("END"), outgoing_payments()
+            else console.log(lines), console.log("generating payments..."), outgoing_payments(total_amount)
         }
          
              
     // ------- SECOND, outgoing payments -----------------
     // see http://www.resilience.me/theory.html 
-    function outgoing_payments(){
+    function outgoing_payments(total_amount){
          var total_amount_pie = Number(total_amount)/taxRate_quota_sum
          
          // create outgoing payment
@@ -204,6 +205,7 @@ console.log(pathway)
          y = 0
          loop()
          function loop(){
+
             if (x<lines.length){     
                 if (y<lines[x].length){
                 
@@ -212,20 +214,18 @@ console.log(pathway)
                 var account = lines[x][y].account
                 var payment = {account: account, amount: amount, currency: currency}
                 
-            callback(payment)
+                callback(payment)
                 y++
                 loop()
                 }
-                else x++
-                loop()
-            }else q++, get_collection();
-         }
-}
+                else x++, loop()
+            }else q++, console.log("swarm-redistribution for currency: "+lines[0][0].currency +" is done. loading next currency..."),COLLECTION = db.collection(account_id), get_collection();
+         }//create outgoing payments to everyone in the swarm
+    }
    
 
         
 }//end swarm_redistribution()
-
 
 
 };

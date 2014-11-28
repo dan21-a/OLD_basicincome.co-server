@@ -46,7 +46,6 @@ function swarm(account_id){
     swarm_redistribution.API(db, account_id, send_client)
     
 function send_client(payment){
-    console.log("hahaha")
     basicincome_co.send_client(payment)
             
 }
